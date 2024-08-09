@@ -42,8 +42,8 @@ public class ItemService {
         item.setPrice(itemRequestDTO.getPrice());
         if(item.getStock() < itemRequestDTO.getStock()){
             item.setLastReStock(new Date());
-            item.setStock(itemRequestDTO.getStock());
         }
+        item.setStock(itemRequestDTO.getStock());
         itemRepository.save(item);
         return "Berhasil update data item %s".formatted(item.getItemName());
     }
