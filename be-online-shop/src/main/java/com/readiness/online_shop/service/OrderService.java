@@ -1,6 +1,7 @@
 package com.readiness.online_shop.service;
 
-import com.readiness.online_shop.dto.request.OrderRequestDTO;
+import com.readiness.online_shop.dto.request.AddOrderRequestDTO;
+import com.readiness.online_shop.dto.request.EditOrderRequestDTO;
 import com.readiness.online_shop.model.Customer;
 import com.readiness.online_shop.model.Item;
 import com.readiness.online_shop.model.Order;
@@ -8,9 +9,12 @@ import com.readiness.online_shop.repository.CustomerRepository;
 import com.readiness.online_shop.repository.ItemRepository;
 import com.readiness.online_shop.repository.OrderRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,7 +36,8 @@ public class OrderService {
         return orderRepository.findAll();
     }
 
-    public String addOrder(OrderRequestDTO orderRequestDTO){
+    @Transactional
+    public String addOrder(AddOrderRequestDTO orderRequestDTO) throws Exception{
         Optional<Customer> findCustomer = customerRepository.findById(orderRequestDTO.getCustomerId());
         if(findCustomer.isEmpty())
             throw new EntityNotFoundException("customerId tidak terdaftar");
@@ -41,7 +46,17 @@ public class OrderService {
             throw new EntityNotFoundException("itemId tidak terdaftar");
         Customer customer = findCustomer.get();
         Item item = findItem.get();
+        if(!item.getIsAvailable())
+            throw new IllegalStateException("Tidak dapat order item yang tidak available");
+        if(!customer.getIsActive())
+            throw new IllegalStateException("Customer yang tidak aktif tidak dapat melakukan order");
+        if(orderRequestDTO.getQuantity() > item.getStock())
+            throw new BadRequestException("Tidak dapat order lebih dari stock");
         Long totalPrice = orderRequestDTO.getQuantity() * item.getPrice();
+        customer.setLastOrderDate(new Date());
+        customerRepository.save(customer);
+        item.setStock(item.getStock() - orderRequestDTO.getQuantity());
+        itemRepository.save(item);
         Order order = Order
                 .builder()
                 .customer(customer)
@@ -53,20 +68,58 @@ public class OrderService {
         return "Berhasil menambahkan order untuk item %s pada customer %s".formatted(item.getItemName(), customer.getCustomerName());
     }
 
-    public String editOrder(Long orderId, OrderRequestDTO orderRequestDTO){
+    @Transactional
+    public String editOrder(Long orderId, EditOrderRequestDTO editOrderRequestDTO) throws Exception{
         Optional<Order> findOrder = orderRepository.findById(orderId);
         if(findOrder.isEmpty())
             throw new EntityNotFoundException("orderId tidak terdaftar");
+        Optional<Item> findItem = itemRepository.findById(editOrderRequestDTO.getItemId());
+        if(findItem.isEmpty())
+            throw new EntityNotFoundException("itemId tidak terdaftar");
         Order order = findOrder.get();
+        Item oldItem = order.getItem();
+        Customer customer = order.getCustomer();
+        Item item = findItem.get();
+        if(oldItem.equals(item)){
+            if(editOrderRequestDTO.getQuantity() > item.getStock() + order.getQuantity())
+                throw new BadRequestException("Tidak dapat order lebih dari stock");
+            item.setStock(item.getStock() + order.getQuantity() - editOrderRequestDTO.getQuantity());
+            order.setQuantity(editOrderRequestDTO.getQuantity());
+            order.setTotalPrice(editOrderRequestDTO.getQuantity() * item.getPrice());
+            itemRepository.save(item);
+            orderRepository.save(order);
+            return "Berhasil update data order %s".formatted(order.getOrderCode());
+        }
+        oldItem.setStock(oldItem.getStock() + order.getQuantity());
+        itemRepository.save(oldItem);
+        if(!item.getIsAvailable())
+            throw new IllegalStateException("Tidak dapat order item yang tidak available");
+        if(!customer.getIsActive())
+            throw new IllegalStateException("Customer yang tidak aktif tidak dapat melakukan order");
+        if(editOrderRequestDTO.getQuantity() > item.getStock())
+            throw new BadRequestException("Tidak dapat order lebih dari stock");
+        customer.setLastOrderDate(new Date());
+        customerRepository.save(customer);
+        item.setStock(item.getStock() - editOrderRequestDTO.getQuantity());
+        itemRepository.save(item);
+        order.setCustomer(customer);
+        order.setItem(item);
+        order.setQuantity(editOrderRequestDTO.getQuantity());
+        order.setTotalPrice(editOrderRequestDTO.getQuantity() * item.getPrice());
+        orderRepository.save(order);
         return "Berhasil update data order %s".formatted(order.getOrderCode());
     }
 
+    @Transactional
     public String deleteOrder(Long orderId){
         Optional<Order> findOrder = orderRepository.findById(orderId);
         if(findOrder.isEmpty())
             throw new EntityNotFoundException("orderId tidak terdaftar");
         Order order = findOrder.get();
+        Item item = order.getItem();
+        item.setStock(item.getStock() + order.getQuantity());
+        itemRepository.save(item);
         orderRepository.delete(order);
-        return "Berhasil menghapus order %s".formatted();
+        return "Berhasil menghapus order %s".formatted(order.getOrderCode());
     }
 }

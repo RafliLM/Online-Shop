@@ -1,6 +1,5 @@
 package com.readiness.online_shop.exception;
 
-import com.readiness.online_shop.dto.response.GeneralResponseDTO;
 import jakarta.persistence.EntityNotFoundException;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
@@ -42,6 +41,10 @@ public class ErrorHandler {
     public @ResponseBody String handleEntityNotFound(EntityNotFoundException e){
         return e.getMessage();
     }
+
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public @ResponseBody String handleIllegalState(IllegalStateException e) { return e.getMessage(); }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

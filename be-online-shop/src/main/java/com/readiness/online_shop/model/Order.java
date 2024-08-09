@@ -33,11 +33,11 @@ public class Order {
     private Date orderDate;
 
     @Column(name = "total_price")
-    @Min(value = 0)
+    @Min(value = 0, message = "TotalPrice tidak boleh kurang dari 0")
     private Long totalPrice;
 
     @Column(name = "quantity")
-    @Min(value = 0)
+    @Min(value = 1, message = "Quantity tidak boleh kurang dari 1")
     private Integer quantity;
 
     @ManyToOne
@@ -47,4 +47,9 @@ public class Order {
     @ManyToOne
     @JoinColumn(name = "item_id")
     private Item item;
+
+    @PrePersist
+    protected void onCreate() {
+        this.setOrderCode(UUID.randomUUID());
+    }
 }
