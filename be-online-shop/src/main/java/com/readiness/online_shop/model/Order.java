@@ -33,11 +33,11 @@ public class Order {
     private Date orderDate;
 
     @Column(name = "total_price")
-    @Min(value = 0, message = "TotalPrice tidak boleh kurang dari 0")
+    @Min(value = 0, message = "TotalPrice can't be less than 0")
     private Long totalPrice;
 
     @Column(name = "quantity")
-    @Min(value = 1, message = "Quantity tidak boleh kurang dari 1")
+    @Min(value = 1, message = "Quantity can't be less than 1")
     private Integer quantity;
 
     @ManyToOne

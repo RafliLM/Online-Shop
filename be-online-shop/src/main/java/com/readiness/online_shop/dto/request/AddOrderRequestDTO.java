@@ -12,13 +12,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AddOrderRequestDTO {
-    @NotNull(message = "Kolom customerId tidak boleh kosong")
+    @NotNull(message = "Field customerId can't be empty")
     private Long customerId;
 
-    @NotNull(message = "Kolom itemId tidak boleh kosong")
+    @NotNull(message = "Field itemId can't be empty")
     private Long itemId;
 
-    @NotNull(message = "Kolom quantity tidak boleh kosong")
-    @Min(value = 1, message = "Quantity tidak boleh kurang dari 1")
+    @NotNull(message = "Field quantity can't be empty")
+    @Min(value = 1, message = "Quantity can't be less than 1")
     private Integer quantity;
 }

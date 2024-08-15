@@ -30,13 +30,13 @@ public class ItemService {
                 .isAvailable(itemRequestDTO.getIsAvailable())
                 .build();
         itemRepository.save(item);
-        return "Berhasil menambahkan item %s".formatted(item.getItemName());
+        return "Successfully added item %s".formatted(item.getItemName());
     }
 
     public String editItem(Long itemId, ItemRequestDTO itemRequestDTO) {
         Optional<Item> findItem = itemRepository.findById(itemId);
         if(findItem.isEmpty())
-            throw new EntityNotFoundException("itemId tidak terdaftar");
+            throw new EntityNotFoundException("itemId not found");
         Item item = findItem.get();
         item.setItemName(itemRequestDTO.getItemName());
         item.setPrice(itemRequestDTO.getPrice());
@@ -46,15 +46,15 @@ public class ItemService {
         item.setStock(itemRequestDTO.getStock());
         item.setIsAvailable(itemRequestDTO.getIsAvailable());
         itemRepository.save(item);
-        return "Berhasil update data item %s".formatted(item.getItemName());
+        return "Successfully updated item %s".formatted(item.getItemName());
     }
 
     public String deleteItem(Long itemId) {
         Optional<Item> findItem = itemRepository.findById(itemId);
         if(findItem.isEmpty())
-            throw new EntityNotFoundException("itemId tidak terdaftar");
+            throw new EntityNotFoundException("itemId not found");
         Item item = findItem.get();
         itemRepository.delete(item);
-        return "Berhasil menghapus item %s".formatted(item.getItemName());
+        return "Successfully deleted item %s".formatted(item.getItemName());
     }
 }

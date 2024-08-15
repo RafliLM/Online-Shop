@@ -41,16 +41,16 @@ public class CustomerService {
     public String addCustomer(AddCustomerRequestDTO addCustomerRequestDTO) throws Exception {
         MultipartFile file = addCustomerRequestDTO.getPic();
         if (file.isEmpty()){
-            throw new BadRequestException("Kolom image_filename tidak boleh kosong");
+            throw new BadRequestException("Column image_filename can't be empty");
         }
         List<String> imageContentType = new ArrayList<String>(
                 Arrays.asList("image/jpg", "image/jpeg", "image/png")
         );
         if((!imageContentType.contains(file.getContentType())) || (file.getSize() > 1024 * 1024)){
-            throw new BadRequestException("Format file tidak sesuai");
+            throw new BadRequestException("File should be an image");
         }
         if (file.getSize() > 1024 * 1024){
-            throw new BadRequestException("Gambar melebihi batas maksimal ukuran (1MB)");
+            throw new BadRequestException("File size can't be more than 1MB");
         }
         String imageFileName = addCustomerRequestDTO.getCustomerName() + "_" + (System.currentTimeMillis()/1000) + "." + FileNameUtils.getExtension(file.getOriginalFilename());
         Customer customer = Customer
@@ -63,14 +63,14 @@ public class CustomerService {
                 .build();
         minioService.uploadFile(file, imageFileName);
         customerRepository.save(customer);
-        return "Berhasil menambahkan customer %s".formatted(customer.getCustomerName());
+        return "Successfully added customer %s".formatted(customer.getCustomerName());
     }
 
     @Transactional
     public String editCustomer(Long customerId, EditCustomerRequestDTO editCustomerRequestDTO) throws Exception{
         Optional<Customer> findCustomer = customerRepository.findById(customerId);
         if(findCustomer.isEmpty())
-            throw new EntityNotFoundException("customerId tidak terdaftar");
+            throw new EntityNotFoundException("customerId not found");
         MultipartFile file = editCustomerRequestDTO.getPic();
         Customer customer = findCustomer.get();
         String oldFileName = null;
@@ -80,10 +80,10 @@ public class CustomerService {
                     Arrays.asList("image/jpg", "image/jpeg", "image/png")
             );
             if((!imageContentType.contains(file.getContentType())) || (file.getSize() > 1024 * 1024)){
-                throw new BadRequestException("Format file tidak sesuai");
+                throw new BadRequestException("File should be an image");
             }
             if (file.getSize() > 1024 * 1024){
-                throw new BadRequestException("Gambar melebihi batas maksimal ukuran (1MB)");
+                throw new BadRequestException("File size can't be more than 1MB");
             }
             oldFileName = customer.getPic();
             imageFileName = editCustomerRequestDTO.getCustomerName() + "_" + (System.currentTimeMillis()/1000) + "." + FileNameUtils.getExtension(file.getOriginalFilename());
@@ -98,16 +98,16 @@ public class CustomerService {
         if(imageFileName != null)
             minioService.uploadFile(file, imageFileName);
         customerRepository.save(customer);
-        return "Berhasil update data customer %s".formatted(customer.getCustomerName());
+        return "Successfully updated customer %s".formatted(customer.getCustomerName());
     }
 
     public String deleteCustomer(Long customerId) throws Exception{
         Optional<Customer> findCustomer = customerRepository.findById(customerId);
         if(findCustomer.isEmpty())
-            throw new EntityNotFoundException("customerId tidak terdaftar");
+            throw new EntityNotFoundException("customerId not found");
         Customer customer = findCustomer.get();
         customerRepository.delete(customer);
         minioService.deleteFile(customer.getPic());
-        return "Berhasil menghapus customer %s".formatted(customer.getCustomerName());
+        return "Successfully deleted customer %s".formatted(customer.getCustomerName());
     }
 }

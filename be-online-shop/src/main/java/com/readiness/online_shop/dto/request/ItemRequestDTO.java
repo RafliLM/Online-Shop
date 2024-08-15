@@ -16,17 +16,17 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ItemRequestDTO {
-    @NotBlank(message = "Kolom itemName tidak boleh kosong")
+    @NotBlank(message = "Field itemName can't be empty")
     private String itemName;
 
-    @NotNull(message = "Kolom stock tidak boleh kosong")
-    @Min(value = 0, message = "Stock tidak boleh bernilai kurang dari 0")
+    @NotNull(message = "Field stock can't be empty")
+    @Min(value = 0, message = "Stock can't be less than 0")
     private Integer stock;
 
-    @NotNull(message = "Kolom price tidak boleh kosong")
-    @Min(value = 0, message = "Price tidak boleh bernilai kurang dari 0")
+    @NotNull(message = "Field price can't be empty")
+    @Min(value = 0, message = "Price can't be less than 0")
     private Long price;
 
-    @NotNull(message = "Kolom isAvailable tidak boleh kosong")
+    @NotNull(message = "Field isAvailable can't be empty")
     private Boolean isAvailable;
 }

@@ -35,11 +35,11 @@ public class Item {
     private UUID itemCode;
 
     @Column(name = "stock")
-    @Min(value = 0, message = "Stock tidak boleh kurang dari 0")
+    @Min(value = 0, message = "Stock can't be less than 0")
     private Integer stock;
 
     @Column(name = "price")
-    @Min(value = 0, message = "Price tidak boleh kurang dari 0")
+    @Min(value = 0, message = "Price can't be less than 0")
     private Long price;
 
     @Column(name = "is_available")

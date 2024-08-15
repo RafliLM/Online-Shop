@@ -27,7 +27,7 @@ export class NavbarComponent {
       let downloadUrl = URL.createObjectURL(blob)
       let link = document.createElement('a')
       link.href = downloadUrl
-      link.download = "test.pdf"
+      link.download = `order-report-${new Date().getTime()}.pdf`
       link.click()
       this.toastr.success("Generate Report Success")
       this.loadingButton = false;

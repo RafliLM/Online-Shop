@@ -14,18 +14,18 @@ import org.springframework.web.multipart.MultipartFile;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EditCustomerRequestDTO {
-    @NotBlank(message = "Kolom customerName tidak boleh kosong")
+    @NotBlank(message = "Column customerName can't be empty")
     private String customerName;
 
-    @NotBlank(message = "Kolom customerAddress tidak boleh kosong")
+    @NotBlank(message = "Column customerAddress can't be empty")
     private String customerAddress;
 
-    @NotBlank(message = "Kolom customerPhone tidak boleh kosong")
-    @Pattern(regexp = "^08[\\d]{9,11}", message = "Kolom customerPhone tidak sesuai format")
+    @NotBlank(message = "Column customerPhone can't be empty")
+    @Pattern(regexp = "^08[\\d]{9,11}", message = "Column customerPhone doesn't match the format")
     private String customerPhone;
 
     private MultipartFile pic;
 
-    @NotNull(message = "Kolom isActive tidak boleh kosong")
+    @NotNull(message = "Column isActive can't be empty")
     private Boolean isActive;
 }
