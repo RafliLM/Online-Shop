@@ -6,10 +6,12 @@ import com.readiness.online_shop.model.Order;
 import com.readiness.online_shop.service.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -36,5 +38,19 @@ public class OrderController {
     @DeleteMapping("/{orderId}")
     public ResponseEntity<String> deleteOrder (@PathVariable Long orderId) throws Exception {
         return ResponseEntity.status(HttpStatus.OK).body(orderService.deleteOrder(orderId));
+    }
+
+    @GetMapping("/generate-report")
+    public ResponseEntity<Resource> downloadReport() throws Exception{
+        byte[] reportContent = orderService.getOrderReport();
+        ByteArrayResource resource = new ByteArrayResource(reportContent);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .contentLength(resource.contentLength())
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        ContentDisposition.attachment().filename("order-report" + new Date() + ".pdf").build().toString())
+                .body(resource);
     }
 }

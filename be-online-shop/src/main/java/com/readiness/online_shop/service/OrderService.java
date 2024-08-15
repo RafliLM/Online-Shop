@@ -10,13 +10,15 @@ import com.readiness.online_shop.repository.ItemRepository;
 import com.readiness.online_shop.repository.OrderRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ResourceUtils;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.io.File;
+import java.util.*;
 
 @Service
 public class OrderService {
@@ -32,8 +34,16 @@ public class OrderService {
     @Autowired
     MinioService minioService;
 
-    public List<Order> getOrder(){
-        return orderRepository.findAll();
+    public List<Order> getOrder() throws Exception{
+        List<Order> orders = orderRepository.findAll();
+        for(int i = 0; i < orders.size(); i++){
+            Order order = orders.get(i);
+            Customer customer = order.getCustomer();
+            customer.setPic(this.minioService.getImageUrl(customer.getPic()));
+            order.setCustomer(customer);
+            orders.set(i, order);
+        }
+        return orders;
     }
 
     @Transactional
@@ -63,6 +73,7 @@ public class OrderService {
                 .item(item)
                 .quantity(orderRequestDTO.getQuantity())
                 .totalPrice(totalPrice)
+                .orderDate(new Date())
                 .build();
         orderRepository.save(order);
         return "Berhasil menambahkan order untuk item %s pada customer %s".formatted(item.getItemName(), customer.getCustomerName());
@@ -121,5 +132,16 @@ public class OrderService {
         itemRepository.save(item);
         orderRepository.delete(order);
         return "Berhasil menghapus order %s".formatted(order.getOrderCode());
+    }
+
+    public byte[] getOrderReport() throws Exception{
+        File file = ResourceUtils.getFile("src/main/resources/report.jrxml");
+        JasperReport jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
+        List<Order> orders = orderRepository.findAll();
+        JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(orders);
+        Map<String, Object> parameters = new HashMap<>();
+        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
+
+        return JasperExportManager.exportReportToPdf(jasperPrint);
     }
 }

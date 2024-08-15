@@ -44,6 +44,7 @@ public class ItemService {
             item.setLastReStock(new Date());
         }
         item.setStock(itemRequestDTO.getStock());
+        item.setIsAvailable(itemRequestDTO.getIsAvailable());
         itemRepository.save(item);
         return "Berhasil update data item %s".formatted(item.getItemName());
     }
