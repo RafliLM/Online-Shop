@@ -3,9 +3,9 @@
 A simple CRUD online shop web application developed using Spring Boot for the backend and Angular for the frontend. The application allows users to manage customers, items, and orders in an online shop environment.
 
 ## Features
-Customer Management: Add, view, edit, and delete customer details.
-Item Management: Add, view, edit, and delete items.
-Order Management: Create, view, and manage orders.
+- Customer Management: Add, view, edit, and delete customer details.
+- Item Management: Add, view, edit, and delete items.
+- Order Management: Create, view, and manage orders.
 
 The project is divided into two main parts:
 
