@@ -6,7 +6,7 @@ A simple CRUD online shop web application developed using Spring Boot for the ba
 Customer Management: Add, view, edit, and delete customer details.
 Item Management: Add, view, edit, and delete items.
 Order Management: Create, view, and manage orders.
-Project Structure
+
 The project is divided into two main parts:
 
 ## Backend (Spring Boot)
