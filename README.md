@@ -49,6 +49,9 @@ mvn spring-boot:run
 The backend will be accessible at http://localhost:8080.
 ### Frontend Setup
 1. Navigate to the frontend directory:
+```console
+cd Frontend
+```
 2. Install the dependencies:
 ```console
 npm install
