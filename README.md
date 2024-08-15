@@ -33,7 +33,7 @@ Key Components:
 - Node.js and npm
 - Angular CLI (Optional for frontend development)
 ### Backend Setup
-1. Configure all the credentials in application.properties
+1. Configure all the credentials for database and minio server in application.properties
 2. Navigate to the backend directory:
 ```console
 cd Backend
