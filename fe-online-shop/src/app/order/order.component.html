@@ -18,11 +18,11 @@
           <tr>
             <th scope="col" class="px-4 py-3 sm:px-6">Order Code</th>
             <th scope="col" class="px-4 py-3 sm:px-6">Customer Name</th>
-            <th scope="col" class="px-4 py-3 sm:px-6 hidden sm:table-cell">Item Name</th>
-            <th scope="col" class="px-4 py-3 sm:px-6 hidden md:table-cell">Quantity</th>
-            <th scope="col" class="px-4 py-3 sm:px-6 hidden lg:table-cell">Total Price</th>
-            <th scope="col" class="px-4 py-3 sm:px-6">Order Date</th>
-            <th scope="col" class="px-4 py-3 sm:px-6 hidden xl:table-cell">Action</th>
+            <th scope="col" class="px-4 py-3 sm:px-6">Item Name</th>
+            <th scope="col" class="px-4 py-3 sm:px-6 hidden sm:table-cell">Quantity</th>
+            <th scope="col" class="px-4 py-3 sm:px-6 hidden sm:table-cell">Total Price</th>
+            <th scope="col" class="px-4 py-3 sm:px-6 hidden sm:table-cell">Order Date</th>
+            <th scope="col" class="px-4 py-3 sm:px-6">Action</th>
           </tr>
         </thead>
         <tbody *ngIf="orders | async as orderList">
@@ -35,15 +35,18 @@
             <td data-label="Code" class="px-4 py-3 sm:px-6 font-medium text-gray-900">
               {{ order.orderCode }}
               <div data-label="Customer" class="sm:hidden text-xs text-gray-500 mt-1">
-                {{ order.customer.customerName }}
+                {{ "Quantity: " + order.quantity }}
+              </div>
+              <div data-label="Item" class="sm:hidden text-xs text-gray-500 mt-1">
+                {{ "Total Price: " + order.totalPrice }}
               </div>
             </td>
-            <td data-label="Customer" class="px-4 py-3 sm:px-6 hidden sm:table-cell">{{ order.customer.customerName }}</td>
-            <td data-label="Item" class="px-4 py-3 sm:px-6 hidden md:table-cell">{{ order.item.itemName }}</td>
+            <td data-label="Customer" class="px-4 py-3 sm:px-6">{{ order.customer.customerName }}</td>
+            <td data-label="Item" class="px-4 py-3 sm:px-6">{{ order.item.itemName }}</td>
             <td data-label="Quantity" class="px-4 py-3 sm:px-6 hidden lg:table-cell">{{ order.quantity }}</td>
             <td data-label="Total Price" class="px-4 py-3 sm:px-6 hidden lg:table-cell">{{ order.totalPrice }}</td>
             <td data-label="Order Date" class="px-4 py-3 sm:px-6 hidden xl:table-cell">{{ order.orderDate | date:'short' }}</td>
-            <td data-label="Action" class="px-4 py-3 sm:px-6 hidden xl:table-cell">
+            <td data-label="Action" class="px-4 py-3 sm:px-6 inline-flex">
               <button type="button" (click)="openModal(order, 'view')">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#4ade80" class="size-6">
                   <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 0 1 .67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 1 1-.671-1.34l.041-.022ZM12 9a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clip-rule="evenodd" />
