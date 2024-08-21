@@ -6,6 +6,7 @@ import com.readiness.online_shop.model.Customer;
 import com.readiness.online_shop.service.CustomerService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +19,11 @@ public class CustomerController {
     @Autowired
     private CustomerService customerService;
 
-    @GetMapping
-    public ResponseEntity<List<Customer>> getCustomer() throws Exception{
-        return ResponseEntity.status(HttpStatus.OK).body(customerService.getCustomer());
+    @GetMapping()
+    public ResponseEntity<Page<Customer>> getCustomer(
+            @RequestParam(required = false) Integer pageNumber, @RequestParam(required = false) Integer pageSize, @RequestParam(required = false) String name
+    ) throws Exception{
+        return ResponseEntity.status(HttpStatus.OK).body(customerService.getCustomer(pageNumber, pageSize, name));
     }
 
     @PostMapping

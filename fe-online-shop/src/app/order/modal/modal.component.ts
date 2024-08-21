@@ -38,23 +38,21 @@ export class ModalComponent {
     this.customers = this.httpClient.get<Customer[]>(this.customerComponent.url)
     .pipe(
       map(result => {
-        result = result.filter((customer) => {
+        return (result as any).content.filter((customer: any) => {
           return customer.isActive
         })
-        return result
       }),
       catchError(error => {
         this.toastr.error(error.message, "Error Occured")
         return throwError(() => new Error(error.message))
       })
     )
-    this.items = this.httpClient.get<Item[]>(this.itemComponent.url)
+    this.items = this.httpClient.get(this.itemComponent.url)
     .pipe(
       map(result => {
-        result = result.filter((item) => {
+        return (result as any).content.filter((item: any) => {
           return item.isAvailable
         })
-        return result
       }),
       catchError(error => {
         this.toastr.error(error.message, "Error Occured")

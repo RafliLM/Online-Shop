@@ -4,14 +4,19 @@ import com.readiness.online_shop.dto.request.AddCustomerRequestDTO;
 import com.readiness.online_shop.dto.request.EditCustomerRequestDTO;
 import com.readiness.online_shop.model.Customer;
 import com.readiness.online_shop.repository.CustomerRepository;
-import io.minio.*;
-import io.minio.http.Method;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import jakarta.transaction.Transactional;
 import org.apache.commons.compress.utils.FileNameUtils;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,14 +33,28 @@ public class CustomerService {
     @Autowired
     MinioService minioService;
 
-    public List<Customer> getCustomer() throws Exception {
-        List<Customer> customers = customerRepository.findAll();
-        for (int i = 0; i < customers.size(); i++){
-            Customer customer = customers.get(i);
-            customer.setPic(minioService.getImageUrl(customer.getPic()));
-            customers.set(i, customer);
+    public Page<Customer> getCustomer(Integer pageNumber, Integer pageSize, String name) throws Exception {
+        Pageable pageable;
+        if (pageNumber != null && pageSize != null) {
+            pageable = PageRequest.of(pageNumber, pageSize);
         }
-        return customers;
+        else
+            pageable = Pageable.unpaged();
+        Page<Customer> customerPage;
+        if(name == null){
+            customerPage = customerRepository.findAll(pageable);
+        }
+        else{
+            customerPage = customerRepository.findByCustomerNameContaining(name, pageable);
+        }
+        return customerPage.map(customer -> {
+            try {
+                customer.setPic(minioService.getImageUrl(customer.getPic()));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            return customer;
+        });
     }
 
     public String addCustomer(AddCustomerRequestDTO addCustomerRequestDTO) throws Exception {

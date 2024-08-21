@@ -6,11 +6,12 @@ import { ToastrService } from 'ngx-toastr';
 import { error } from 'console';
 import { ModalComponent } from './modal/modal.component';
 import { Item } from './item';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-item',
   standalone: true,
-  imports: [CommonModule, ModalComponent],
+  imports: [CommonModule, ModalComponent, FormsModule],
   templateUrl: './item.component.html',
   styleUrl: './item.component.css'
 })
@@ -30,16 +31,31 @@ export class ItemComponent implements OnInit {
     lastReStock: string;
   }[]> | undefined;
   url : string = "http://localhost:8080/items";
+  pageNumber: number = 0;
+  pageSize: number = 10;
+  nameFilter: string = "";
+  totalPages: number = 0;
+  totalCustomer: number = 0;
   constructor(private httpClient : HttpClient, private toastr : ToastrService, private cd: ChangeDetectorRef) {}
   ngOnInit() {
     this.getItem()
   }
 
   getItem(){
-    this.items = this.httpClient.get(this.url)
+    this.items = this.httpClient.get(this.url, {
+      params: {
+        pageNumber: this.pageNumber,
+        pageSize: this.pageSize,
+        name: this.nameFilter
+      }
+    })
     .pipe(
       map(result => {
-        return result as any
+        this.totalPages = (result as any).page.totalPages
+        this.pageSize = (result as any).page.size
+        this.pageNumber = (result as any).page.number
+        this.totalCustomer = (result as any).page.totalElements
+        return (result as any).content
       }),
       catchError(error => {
         this.toastr.error(error.message, "Error Occured")
@@ -47,6 +63,11 @@ export class ItemComponent implements OnInit {
       })
     )
     this.cd.detectChanges()
+  }
+
+  changePage(page: number){
+    this.pageNumber = page
+    this.getItem()
   }
 
   deleteItem(itemId : number){

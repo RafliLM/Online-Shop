@@ -5,6 +5,9 @@ import com.readiness.online_shop.model.Item;
 import com.readiness.online_shop.repository.ItemRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -17,8 +20,21 @@ public class ItemService {
     @Autowired
     private ItemRepository itemRepository;
 
-    public List<Item> getItem() {
-        return itemRepository.findAll();
+    public Page<Item> getItem(Integer pageNumber, Integer pageSize, String name) {
+        Pageable pageable;
+        if (pageNumber != null && pageSize != null) {
+            pageable = PageRequest.of(pageNumber, pageSize);
+        }
+        else
+            pageable = Pageable.unpaged();
+        Page<Item> itemPage;
+        if(name == null){
+            itemPage = itemRepository.findAll(pageable);
+        }
+        else{
+            itemPage = itemRepository.findByItemNameContaining(name, pageable);
+        }
+        return itemPage;
     }
 
     public String addItem(ItemRequestDTO itemRequestDTO) {

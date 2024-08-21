@@ -5,6 +5,7 @@ import com.readiness.online_shop.model.Item;
 import com.readiness.online_shop.service.ItemService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,8 +18,10 @@ public class ItemController {
     @Autowired
     ItemService itemService;
     @GetMapping
-    public ResponseEntity<List<Item>> getItem() throws Exception{
-        return ResponseEntity.status(HttpStatus.OK).body(itemService.getItem());
+    public ResponseEntity<Page<Item>> getItem(
+            @RequestParam(required = false) Integer pageNumber, @RequestParam(required = false) Integer pageSize, @RequestParam(required = false) String name
+    ) throws Exception{
+        return ResponseEntity.status(HttpStatus.OK).body(itemService.getItem(pageNumber, pageSize, name));
     }
 
     @PostMapping

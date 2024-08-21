@@ -8,11 +8,12 @@ import { ModalComponent } from './modal/modal.component';
 import { Order } from './order';
 import { Customer } from '../customer/customer';
 import { Item } from '../item/item';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-order',
   standalone: true,
-  imports: [CommonModule, ModalComponent],
+  imports: [CommonModule, ModalComponent, FormsModule],
   templateUrl: './order.component.html',
   styleUrl: './order.component.css'
 })
@@ -32,16 +33,31 @@ export class OrderComponent implements OnInit {
     orderDate: string;
   }[]> | undefined;
   url : string = "http://localhost:8080/orders";
+  pageNumber: number = 0;
+  pageSize: number = 10;
+  nameFilter: string = "";
+  totalPages: number = 0;
+  totalCustomer: number = 0;
   constructor(private httpClient : HttpClient, private toastr : ToastrService, private cd: ChangeDetectorRef) {}
   ngOnInit() {
     this.getOrder()
   }
 
   getOrder(){
-    this.orders = this.httpClient.get(this.url)
+    this.orders = this.httpClient.get(this.url, {
+      params: {
+        pageNumber: this.pageNumber,
+        pageSize: this.pageSize,
+        name: this.nameFilter
+      }
+    })
     .pipe(
       map(result => {
-        return result as any
+        this.totalPages = (result as any).page.totalPages
+        this.pageSize = (result as any).page.size
+        this.pageNumber = (result as any).page.number
+        this.totalCustomer = (result as any).page.totalElements
+        return (result as any).content
       }),
       catchError(error => {
         this.toastr.error(error.message, "Error Occured")
@@ -49,6 +65,11 @@ export class OrderComponent implements OnInit {
       })
     )
     this.cd.detectChanges()
+  }
+
+  changePage(page: number){
+    this.pageNumber = page
+    this.getOrder()
   }
 
   deleteOrder(orderId : number){
@@ -65,6 +86,7 @@ export class OrderComponent implements OnInit {
       }
     })
   }
+
   async openModal(data : any, mode: string) {
     if(this.modal){
       this.modal.mode = mode

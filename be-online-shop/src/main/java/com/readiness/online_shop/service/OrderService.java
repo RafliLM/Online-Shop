@@ -9,11 +9,19 @@ import com.readiness.online_shop.repository.CustomerRepository;
 import com.readiness.online_shop.repository.ItemRepository;
 import com.readiness.online_shop.repository.OrderRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import jakarta.transaction.Transactional;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
@@ -34,16 +42,30 @@ public class OrderService {
     @Autowired
     MinioService minioService;
 
-    public List<Order> getOrder() throws Exception{
-        List<Order> orders = orderRepository.findAll();
-        for(int i = 0; i < orders.size(); i++){
-            Order order = orders.get(i);
+    public Page<Order> getOrder(int pageNumber, int pageSize, String name) throws Exception{
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Order> orderPage = orderRepository.findAll(new Specification<Order>() {
+            @Override
+            public Predicate toPredicate(Root<Order> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+                List<Predicate> predicates = new ArrayList<Predicate>();
+                if (name != null) {
+                    predicates.add(criteriaBuilder.like(root.get("customer").get("customerName"), "%"+name+"%"));
+                    predicates.add(criteriaBuilder.like(root.get("item").get("itemName"), "%"+name+"%"));
+                    return criteriaBuilder.or(predicates.toArray(new Predicate[predicates.size()]));
+                }
+                return null;
+            }
+        }, pageable);
+        return orderPage.map(order -> {
             Customer customer = order.getCustomer();
-            customer.setPic(this.minioService.getImageUrl(customer.getPic()));
+            try {
+                customer.setPic(minioService.getImageUrl(customer.getPic()));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
             order.setCustomer(customer);
-            orders.set(i, order);
-        }
-        return orders;
+            return order;
+        });
     }
 
     @Transactional

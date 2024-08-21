@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,8 +22,10 @@ public class OrderController {
     OrderService orderService;
     
     @GetMapping
-    public ResponseEntity<List<Order>> getOrder() throws Exception{
-        return ResponseEntity.status(HttpStatus.OK).body(orderService.getOrder());
+    public ResponseEntity<Page<Order>> getOrder(
+            @RequestParam Integer pageNumber, @RequestParam Integer pageSize, @RequestParam(required = false) String name
+    ) throws Exception{
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.getOrder(pageNumber, pageSize, name));
     }
 
     @PostMapping

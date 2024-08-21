@@ -6,11 +6,12 @@ import { ToastrService } from 'ngx-toastr';
 import { error } from 'console';
 import { ModalComponent } from './modal/modal.component';
 import { Customer } from './customer';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-customer',
   standalone: true,
-  imports: [CommonModule, ModalComponent],
+  imports: [CommonModule, ModalComponent, FormsModule],
   templateUrl: './customer.component.html',
   styleUrl: './customer.component.css'
 })
@@ -31,16 +32,31 @@ export class CustomerComponent implements OnInit {
     lastOrderDate: string;
   }[]> | undefined;
   url : string = "http://localhost:8080/customers";
+  pageNumber: number = 0;
+  pageSize: number = 10;
+  nameFilter: string = "";
+  totalPages: number = 0;
+  totalCustomer: number = 0;
   constructor(private httpClient : HttpClient, private toastr : ToastrService, private cd: ChangeDetectorRef) {}
   ngOnInit() {
     this.getCustomer()
   }
 
   getCustomer(){
-    this.customers = this.httpClient.get(this.url)
+    this.customers = this.httpClient.get(this.url, {
+      params: {
+        pageNumber: this.pageNumber,
+        pageSize: this.pageSize,
+        name: this.nameFilter
+      }
+    })
     .pipe(
       map(result => {
-        return result as any
+        this.totalPages = (result as any).page.totalPages
+        this.pageSize = (result as any).page.size
+        this.pageNumber = (result as any).page.number
+        this.totalCustomer = (result as any).page.totalElements
+        return (result as any).content
       }),
       catchError(error => {
         this.toastr.error(error.message, "Error Occured")
@@ -48,6 +64,11 @@ export class CustomerComponent implements OnInit {
       })
     )
     this.cd.detectChanges()
+  }
+
+  changePage(page: number){
+    this.pageNumber = page
+    this.getCustomer()
   }
 
   deleteCustomer(customerId : number){
@@ -64,6 +85,7 @@ export class CustomerComponent implements OnInit {
       }
     })
   }
+
   async openModal(data : any, mode: string) {
     if(this.modal){
       this.modal.mode = mode
@@ -77,6 +99,7 @@ export class CustomerComponent implements OnInit {
         this.modal.openModal()
     }
   }
+
   async getFileFromUrl(url: string, name: string, defaultType = 'image/jpeg'){
     const response = await fetch(url);
     const data = await response.blob();
